@@ -1,0 +1,24 @@
+---
+#Target Hosts
+targethosts: glusterfs
+
+#glusterfs version
+glusterfs_version: 7
+
+blockdev_name: /dev/sdb
+pvname: "{{ blockdev_name }}1"
+vgname: vgk8s
+lvname: lvl8s
+#partition_size: 5GiB
+part_size: 100%FREE
+fs_type: xfs
+volname: k8sdata
+vol_type: replicated
+#vol_type: distributed
+#vol_type: dist_replctd
+#vol_type: stripped
+
+#populated vars
+lvol: "/dev/mapper/{{ vgname }}-{{ lvname }}"
+mount_point: "/glusterfs/{{ volname }}/brick1"
+volume_bricks: "{{ mount_point}}/brick" 

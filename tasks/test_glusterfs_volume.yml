@@ -1,0 +1,25 @@
+---
+- name: 'Installing glusterfs-fuse on the test host'
+  package:
+    name: glusterfs-fuse
+    state: present
+  ignore_errors: yes
+
+- name: 'Creating client mount point /{{ volname }} on test host'
+  file:
+    state: directory
+    path: "/{{ volname }}"
+    mode: '0755'
+
+- name: 'Mounting {{ volname }} on test host'
+  mount:
+    path: "/{{ volname }}"
+    src: "{{ ansible_host }}:{{ volname }}"
+    fstype: glusterfs
+    state: mounted
+    backup: yes
+  register: client_mount
+
+- name: 'Client mount details'
+  debug:
+    msg: "{{ client_mount }}"

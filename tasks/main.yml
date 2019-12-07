@@ -1,0 +1,24 @@
+---
+- name: 'Preparing Block Devices'
+  include_tasks: prepare_block_devices.yml
+  tags: prep_bock_devices
+
+- name: 'Installing Glusterd packages on Debian Host'
+  include_tasks: install_debian.yml
+  when: ansible_distribution == 'Debian'
+  tags: install_debian
+
+- name: 'Installing Glusterd packages on Ubuntu Host'
+  include_tasks: install_ubuntu.yml
+  when: ansible_distribution == 'Ubuntu'
+  tags: install_ubuntu
+ 
+- name: 'Configuring GlusterFS volume {{ volname }} on Debian Host'
+  when: play_hosts.index(inventory_hostname) == 0
+  include_tasks: configure_glusterfs.yml
+  tags: config_cluster_volume
+
+- name: 'Testing newly created volume'
+  include_tasks: test_glusterfs_volume.yml
+  when: play_hosts.index(inventory_hostname) == 0
+  tags: test_created_volume

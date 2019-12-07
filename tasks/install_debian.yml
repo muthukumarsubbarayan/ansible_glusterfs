@@ -1,0 +1,55 @@
+---
+- name: 'Installing pkgs to manage {{ ansible_pkg_mgr }} repos'
+  package:
+    name: ca-certificates, curl, gnupg2, software-properties-common 
+    state: present 
+  tags: pkg_mgr_prereqs
+
+- name: 'Installing pkgs for gpg verfication for python2'
+  package:
+    name: gpg, gpgv, python-apt
+    state: latest
+  when: ansible_python.version.major == 2
+  tags: inst_gpg_pkgs_py2
+
+- name: 'Installing pkgs for gpg verfication python3'
+  package:
+    name: gpg, gpgv, python3-apt
+    state: latest
+  when: ansible_python.version.major == 3
+  tags: inst_gpg_pkgs_py3
+
+- name: 'Adding rpm gpg key GlusterFs repo'
+  apt_key:
+    url: "https://download.gluster.org/pub/gluster/glusterfs/{{ glusterfs_version }}/rsa.pub"
+    id: F9C958A3AEE0D2184FAD1CBD43607F0DC2F8238C
+    state: present
+  tags: add_gpgkey
+
+- name: 'Getting dpkg architecture'
+  shell:
+    cmd: dpkg --print-architecture
+  register: dpkg_arch
+  tags: always
+
+- name: 'Adding GlusterFs Repo' 
+  apt_repository:
+    repo: "deb https://download.gluster.org/pub/gluster/glusterfs/LATEST/Debian/{{ ansible_distribution_major_version }}/{{ dpkg_arch.stdout }}/apt {{ ansible_lsb.codename }} main"
+    state: present
+    filename: gluster
+    mode: '0644'
+    update_cache: yes
+  tags: add_gluster_repo
+
+- name: 'Installing GlusterFS Server, Client pkgs'
+  package:
+    name: glusterfs-server, glusterfs-client
+    state: present
+  tags: install_glusterfs_pgs
+
+- name: 'Enable Start glusterd service'
+  service:
+    name: glusterd
+    state: started
+    enabled: yes
+  tags: enable_glusterd_svc 

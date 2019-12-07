@@ -1,0 +1,69 @@
+---
+- name: 'Installing parted, lvm2, xfsprogs'
+  package: 
+    name: parted, lvm2, xfsprogs
+    state: present
+
+- name: 'Reading Disk Info {{ blockdev_name }}'
+  parted:
+    device: "{{ blockdev_name }}"
+    unit: MiB
+  register: device_info
+
+- name: 'Current partition Scheeme:'
+  debug:
+    msg: 
+      - "Current partition Scheeme:"
+      - "{{ device_info }}"
+
+- name: 'Creating partions on {{ blockdev_name }}'
+  parted:
+    device: "{{ blockdev_name }}"
+    name: GPT
+    label: gpt
+    align: optimal
+    part_type: primary
+    number: 1
+    state: present
+
+- name: "Creating LVM Volume Group {{ vgname }}"
+  lvg:
+    vg: "{{ vgname }}"
+    pvs: "{{ pvname }}"
+  ignore_errors: yes
+
+- name:  'Creating logical volume: /dev/{{ vgname }}/{{ lvname }}'
+  lvol:
+    vg: "{{ vgname }}"
+    lv: "{{ lvname }}"
+    size: 100%FREE
+  ignore_errors: yes
+
+- name: 'Creating {{ fs_type }} file system'
+  filesystem:
+    fstype: "{{ fs_type }}"
+    dev: "{{ lvol }}"
+  ignore_errors: yes
+
+- name: 'Creating Mount Point'
+  file:
+    path: "{{ mount_point }}"
+    state: directory
+    mode: '0755'
+
+- name: 'Mounting {{ lvol }} at {{ mount_point }} => Brick'
+  mount:
+    backup: yes
+    src: "{{ lvol }}"
+    fstype: "{{ fs_type }}"
+    path: "{{ mount_point }}"
+    state: mounted
+
+- name: 'Getting Brick capacity'
+  shell: "df -h {{ mount_point }}"
+  register: mount_output
+
+- name: 'Current Brick(s) Capacity'  
+  debug: 
+    msg: "{{ mount_output.stdout_lines }}"
+

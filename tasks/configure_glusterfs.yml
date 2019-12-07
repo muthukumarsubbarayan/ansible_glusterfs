@@ -1,0 +1,32 @@
+---
+- name: 'Creating glusterfs cluster for {{ volname }}'
+  gluster_peer:
+    nodes: "{{ ansible_play_hosts_all | difference(ansible_host)}}"
+    state: present
+  tags: probe_glusterfs_peers
+
+- name: 'Pause for 30 seconds for peer probing to get complete'
+  pause:
+    seconds: 30
+
+- name: 'Display create_volume params'
+  debug:
+    msg:
+      - "{{ volname }}"
+      - "{{ volume_bricks }}"
+      - "{{ lookup('flattened', play_hosts) }}"
+      - "{{ play_hosts|length }}"
+
+- name: 'Creating {{ volname }} volume'
+  gluster_volume:
+    name: "{{ volname }}"
+    bricks:  "{{ volume_bricks }}" 
+    cluster: "{{ lookup('flattened', play_hosts) }}"
+    replicas: "{{ play_hosts|length }}"
+    state: present
+  register: created_volume
+  tags: "create_{{ volname }}_volume"
+
+- name: 'Details of newsly created {{ volname }} volume'
+  debug:
+    msg: "{{ created_volume }}"
