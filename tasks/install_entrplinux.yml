@@ -1,0 +1,34 @@
+---
+- name: 'Install pkgs to manage {{ ansible_pkg_mgr }} repos'
+  package:                                                                     
+    name: "{{ ansible_pkg_mgr }}-utils, device-mapper-persistent-data, lvm2" 
+    state: present 
+  tags: pkg_mgr_prereqs 
+  
+- name: 'Add rpm gpg key for GlusterFS Repo' 
+  rpm_key:
+    state: present
+    fingerprint: F9C958A3AEE0D2184FAD1CBD43607F0DC2F8238C
+    key: https://download.gluster.org/pub/gluster/glusterfs/7/rsa.pub
+  tags: add_rpm_gpg
+
+- name: 'Add GlusterFS Repo'
+  yum_repository:
+    name: glusterfs-rhel8
+    description: GlusterFS
+    file: glusterfs-rhel8
+    baseurl: "https://download.gluster.org/pub/gluster/glusterfs/{{ glusterfs_version }}/LATEST/RHEL/el-$releasever/$basearch/"
+  tags: add_rpm_gpg
+
+- name: 'Installing GlusterFS Server, Client pkgs'
+  package:
+    name: glusterfs-server, glusterfs-client
+    state: present
+  tags: install_glusterfs_pgs
+
+- name: 'Enable Start glusterd service'
+  service:
+    name: glusterd
+    state: started
+    enabled: yes
+  tags: enable_glusterd_svc 

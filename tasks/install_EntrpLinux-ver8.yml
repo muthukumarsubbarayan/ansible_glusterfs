@@ -1,0 +1,39 @@
+---
+- name: 'Installing pkgs to manage {{ ansible_pkg_mgr }} repos'
+  package:                                                                     
+    name: "{{ ansible_pkg_mgr }}-utils, device-mapper-persistent-data, lvm2" 
+    state: present 
+  tags: pkg_mgr_prereqs 
+
+- name: 'Installing CentOS PowerTools repo to address python3-pyxattr dependancy'
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    backup: yes
+    owner: root
+    group: root
+    mode: '0644'
+  with_items:
+    - { src: 'files/CentOS-PowerTools.repo', dest: '/etc/yum.repos.d/CentOS-PowerTools.repo' }
+    - { src: 'files/RPM-GPG-KEY-centosofficial', dest: '/etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial' }
+ 
+- name: "Enabling GlusterFS repo on {{ansible_distribution}} {{ansible_distribution_major_version}}"
+  yum_repository:
+    name: glusterfs-rhel8
+    description: GlusterFS
+    file: glusterfs-rhel8
+    baseurl: "https://download.gluster.org/pub/gluster/glusterfs/{{ glusterfs_version }}/LATEST/RHEL/el-$releasever/$basearch/"
+  tags: add_glusterfs_repo
+
+- name: 'Installing GlusterFS Server, Client pkgs'
+  package:
+    name: glusterfs-server, glusterfs-client
+    state: present
+  tags: install_glusterfs_pgs
+
+- name: 'Enabling and Starting glusterd service'
+  service:
+    name: glusterd
+    state: started
+    enabled: yes
+  tags: enable_glusterd_svc 
