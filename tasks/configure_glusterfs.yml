@@ -25,7 +25,7 @@
     replicas: "{{ play_hosts|length }}"
     state: present
   register: created_volume
-  tags: "create_{{ volname }}_volume"
+  tags: "create_{{volname}}_volume"
 
 - name: 'Details of newsly created {{ volname }} volume'
   debug:

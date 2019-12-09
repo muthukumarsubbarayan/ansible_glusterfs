@@ -3,22 +3,26 @@
 ### Replicated GlusterFS cluster setup
 
 Creates
-glusterfs cluster with 1 brick/host to be used as persistent storage for docker{swarm)/k8s. Tested on debian/Ubuntu.
+glusterfs cluster with 1 brick/host to be used as persistent storage for docker{swarm)/k8s. Tested on debian/Ubuntu/Redhat/CentOS hosts
 
 *$ ansible-playbook /etc/ansible/roles/glusterfs/glusterfs.yml  --flush-cache*
 
 **Playbooks**
 
-	/etc/ansible/roles/glusterfs/
+	/etc/ansible/roles/glusterfs
 	├── defaults
 	│   └── main.yml
 	├── files
+	│   ├── CentOS-PowerTools.repo
+	│   └── RPM-GPG-KEY-centosofficial
 	├── glusterfs.yml
 	├── handlers
 	├── meta
+	├── README.md
 	├── tasks
 	│   ├── configure_glusterfs.yml
 	│   ├── install_debian.yml
+	│   ├── install_EntrpLinux-ver8.yml
 	│   ├── install_ubuntu.yml
 	│   ├── main.yml
 	│   ├── prepare_block_devices.yml
@@ -696,3 +700,408 @@ glusterfs cluster with 1 brick/host to be used as persistent storage for docker{
 	glusterfs : Mounting k8sdata on test host --------------------------------------------------- 0.76s
 	glusterfs : Installing Glusterd packages on Ubuntu Host ------------------------------------- 0.50s 
 	Playbook run took 0 days, 0 hours, 9 minutes, 2 seconds
+
+**#Ansible play output:** RedHat/Centos/Oracle Linux version 8 with three nodes, one for each distro
+
+	PLAY [Install GlusterFS] 
+	**************************************************************************************************************
+
+	TASK [Gathering Facts] 
+	****************************************************************************************************************
+	Sunday  08 December 2019  20:53:17 -0500 (0:00:00.278)       0:00:00.278 *******
+	ok: [rhel891.mydomain.com]
+	ok: [ora8210.mydomain.com]
+	ok: [centos880.mydomain.com]
+
+	TASK [glusterfs : Preparing Block Devices] 
+	********************************************************************************************
+	Sunday  08 December 2019  20:53:24 -0500 (0:00:07.010)       0:00:07.289 *******
+	included: /opt/data/mydev/github/ansible_glusterfs/tasks/prepare_block_devices.yml for centos880.mydomain.com, ora8210.mydomain.com, rhel891.mydomain.com
+
+	TASK [glusterfs : Installing parted, lvm2, xfsprogs] 
+	**********************************************************************************
+	Sunday  08 December 2019  20:53:24 -0500 (0:00:00.351)       0:00:07.641 *******
+	ok: [rhel891.mydomain.com]
+	ok: [ora8210.mydomain.com]
+	ok: [centos880.mydomain.com]
+
+	TASK [glusterfs : Reading Disk Info /dev/sdb] 
+	*****************************************************************************************
+	Sunday  08 December 2019  20:53:57 -0500 (0:00:32.386)       0:00:40.027 *******
+	ok: [centos880.mydomain.com]
+	ok: [ora8210.mydomain.com]
+	ok: [rhel891.mydomain.com]
+
+	TASK [glusterfs : Current partition Scheeme:] 
+	*****************************************************************************************
+	Sunday  08 December 2019  20:54:03 -0500 (0:00:05.949)       0:00:45.977 *******
+	ok: [centos880.mydomain.com] => {
+		"msg": [
+			"Current partition Scheeme:",
+			{
+				"changed": false,
+				"disk": {
+					"dev": "/dev/sdb",
+					"logical_block": 512,
+					"model": "Msft Virtual Disk",
+					"physical_block": 4096,
+					"size": 5120.0,
+					"table": "gpt",
+					"unit": "mib"
+				},
+				"failed": false,
+				"partitions": [
+					{
+						"begin": 1.0,
+						"end": 5119.0,
+						"flags": [],
+						"fstype": "",
+						"name": "GPT",
+						"num": 1,
+						"size": 5118.0,
+						"unit": "mib"
+					}
+				],
+				"script": "unit 'MiB' print"
+			}
+		]
+	}
+	ok: [ora8210.mydomain.com] => {
+		"msg": [
+			"Current partition Scheeme:",
+			{
+				"changed": false,
+				"disk": {
+					"dev": "/dev/sdb",
+					"logical_block": 512,
+					"model": "Msft Virtual Disk",
+					"physical_block": 4096,
+					"size": 5120.0,
+					"table": "gpt",
+					"unit": "mib"
+				},
+				"failed": false,
+				"partitions": [
+					{
+						"begin": 1.0,
+						"end": 5119.0,
+						"flags": [],
+						"fstype": "",
+						"name": "GPT",
+						"num": 1,
+						"size": 5118.0,
+						"unit": "mib"
+					}
+				],
+				"script": "unit 'MiB' print"
+			}
+		]
+	}
+	ok: [rhel891.mydomain.com] => {
+		"msg": [
+			"Current partition Scheeme:",
+			{
+				"changed": false,
+				"disk": {
+					"dev": "/dev/sdb",
+					"logical_block": 512,
+					"model": "Msft Virtual Disk",
+					"physical_block": 4096,
+					"size": 5120.0,
+					"table": "gpt",
+					"unit": "mib"
+				},
+				"failed": false,
+				"partitions": [
+					{
+						"begin": 1.0,
+						"end": 5119.0,
+						"flags": [],
+						"fstype": "",
+						"name": "GPT",
+						"num": 1,
+						"size": 5118.0,
+						"unit": "mib"
+					}
+				],
+				"script": "unit 'MiB' print"
+			}
+		]
+	}
+
+	TASK [glusterfs : Creating partions on /dev/sdb] 
+	**************************************************************************************
+	Sunday  08 December 2019  20:54:03 -0500 (0:00:00.186)       0:00:46.163 *******
+	ok: [centos880.mydomain.com]
+	ok: [ora8210.mydomain.com]
+	ok: [rhel891.mydomain.com]
+
+	TASK [glusterfs : Creating LVM Volume Group vgpstore] 
+	*********************************************************************************
+	Sunday  08 December 2019  20:54:04 -0500 (0:00:01.617)       0:00:47.781 *******
+	changed: [centos880.mydomain.com]
+	changed: [rhel891.mydomain.com]
+	changed: [ora8210.mydomain.com]
+
+	TASK [glusterfs : Creating logical volume: /dev/vgpstore/lvpstore] 
+	********************************************************************
+	Sunday  08 December 2019  20:54:08 -0500 (0:00:03.563)       0:00:51.344 *******
+	changed: [ora8210.mydomain.com]
+	changed: [rhel891.mydomain.com]
+	changed: [centos880.mydomain.com]
+
+	TASK [glusterfs : Creating xfs file system] 
+	*******************************************************************************************
+	Sunday  08 December 2019  20:54:11 -0500 (0:00:03.274)       0:00:54.619 *******
+	changed: [ora8210.mydomain.com]
+	changed: [rhel891.mydomain.com]
+	changed: [centos880.mydomain.com]
+
+	TASK [glusterfs : Creating Mount Point] 
+	***********************************************************************************************
+	Sunday  08 December 2019  20:54:14 -0500 (0:00:02.727)       0:00:57.346 *******
+	changed: [ora8210.mydomain.com]
+	changed: [rhel891.mydomain.com]
+	changed: [centos880.mydomain.com]
+
+	TASK [glusterfs : Mounting /dev/mapper/vgpstore-lvpstore at /glusterfs/pstoredata/brick1 => Brick] 
+	************************************
+	Sunday  08 December 2019  20:54:16 -0500 (0:00:01.547)       0:00:58.893 *******
+	changed: [centos880.mydomain.com]
+	changed: [rhel891.mydomain.com]
+	changed: [ora8210.mydomain.com]
+
+	TASK [glusterfs : Getting Brick capacity] 
+	*********************************************************************************************
+	Sunday  08 December 2019  20:54:18 -0500 (0:00:02.473)       0:01:01.367 *******
+	changed: [rhel891.mydomain.com]
+	changed: [ora8210.mydomain.com]
+	changed: [centos880.mydomain.com]
+
+	TASK [glusterfs : Current Brick(s) Capacity] 
+	******************************************************************************************
+	Sunday  08 December 2019  20:54:20 -0500 (0:00:01.993)       0:01:03.360 *******
+	ok: [centos880.mydomain.com] => {
+		"msg": [
+			"Filesystem                     Size  Used Avail Use% Mounted on",
+			"/dev/mapper/vgpstore-lvpstore  5.0G   68M  5.0G   2% /glusterfs/pstoredata/brick1"
+		]
+	}
+	ok: [ora8210.mydomain.com] => {
+		"msg": [
+			"Filesystem                     Size  Used Avail Use% Mounted on",
+			"/dev/mapper/vgpstore-lvpstore  5.0G   68M  5.0G   2% /glusterfs/pstoredata/brick1"
+		]
+	}
+	ok: [rhel891.mydomain.com] => {
+		"msg": [
+			"Filesystem                     Size  Used Avail Use% Mounted on",
+			"/dev/mapper/vgpstore-lvpstore  5.0G   68M  5.0G   2% /glusterfs/pstoredata/brick1"
+		]
+	}
+
+	TASK [glusterfs : Installing Glusterd packages on Debian Host] 
+	************************************************************************
+	Sunday  08 December 2019  20:54:20 -0500 (0:00:00.248)       0:01:03.609 *******
+	skipping: [centos880.mydomain.com]
+	skipping: [ora8210.mydomain.com]
+	skipping: [rhel891.mydomain.com]
+
+	TASK [glusterfs : Installing Glusterd packages on Ubuntu Host] 
+	************************************************************************
+	Sunday  08 December 2019  20:54:21 -0500 (0:00:00.266)       0:01:03.876 *******
+	skipping: [centos880.mydomain.com]
+	skipping: [ora8210.mydomain.com]
+	skipping: [rhel891.mydomain.com]
+
+	TASK [glusterfs : Installing Glusterd packages on CentOS/RedHat/OracleLinux] 
+	**********************************************************
+	Sunday  08 December 2019  20:54:21 -0500 (0:00:00.263)       0:01:04.139 *******
+	included: /opt/data/mydev/github/ansible_glusterfs/tasks/install_EntrpLinux-ver8.yml for centos880.mydomain.com, ora8210.mydomain.com, rhel891.mydomain.com
+
+	TASK [glusterfs : Installing pkgs to manage dnf repos] 
+	********************************************************************************
+	Sunday  08 December 2019  20:54:21 -0500 (0:00:00.551)       0:01:04.690 *******
+	ok: [centos880.mydomain.com]
+	ok: [ora8210.mydomain.com]
+	ok: [rhel891.mydomain.com]
+
+	TASK [glusterfs : Installing CentOS PowerTools repo to address python3-pyxattr dependancy] 
+	********************************************
+	Sunday  08 December 2019  20:54:36 -0500 (0:00:14.863)       0:01:19.554 *******
+	changed: [centos880.mydomain.com] => (item={'src': 'files/CentOS-PowerTools.repo', 'dest': '/etc/yum.repos.d/CentOS-PowerTools.repo'})changed: [rhel891.mydomain.com] => (item={'src': 'files/CentOS-PowerTools.repo', 'dest': '/etc/yum.repos.d/CentOS-PowerTools.repo'})
+	changed: [ora8210.mydomain.com] => (item={'src': 'files/CentOS-PowerTools.repo', 'dest': '/etc/yum.repos.d/CentOS-PowerTools.repo'})
+	changed: [rhel891.mydomain.com] => (item={'src': 'files/RPM-GPG-KEY-centosofficial', 'dest': '/etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial'})
+	changed: [centos880.mydomain.com] => (item={'src': 'files/RPM-GPG-KEY-centosofficial', 'dest': '/etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial'})
+	changed: [ora8210.mydomain.com] => (item={'src': 'files/RPM-GPG-KEY-centosofficial', 'dest': '/etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial'})
+
+	TASK [glusterfs : Enabling GlusterFS repo on CentOS 8] 
+	********************************************************************************
+	Sunday  08 December 2019  20:54:42 -0500 (0:00:05.442)       0:01:24.997 *******
+	ok: [rhel891.mydomain.com]
+	ok: [centos880.mydomain.com]
+	ok: [ora8210.mydomain.com]
+
+	TASK [glusterfs : Installing GlusterFS Server, Client pkgs] 
+	***************************************************************************
+	Sunday  08 December 2019  20:54:43 -0500 (0:00:01.480)       0:01:26.477 *******
+	changed: [centos880.mydomain.com]
+	changed: [ora8210.mydomain.com]
+	changed: [rhel891.mydomain.com]
+
+	TASK [glusterfs : Enabling and Starting glusterd service] 
+	*****************************************************************************
+	Sunday  08 December 2019  20:56:43 -0500 (0:01:59.937)       0:03:26.414 *******
+	changed: [ora8210.mydomain.com]
+	changed: [rhel891.mydomain.com]
+	changed: [centos880.mydomain.com]
+
+	TASK [glusterfs : Configuring GlusterFS volume pstoredata on Debian Host] 
+	*************************************************************
+	Sunday  08 December 2019  20:57:03 -0500 (0:00:19.985)       0:03:46.400 *******
+	skipping: [ora8210.mydomain.com]
+	skipping: [rhel891.mydomain.com]
+	included: /opt/data/mydev/github/ansible_glusterfs/tasks/configure_glusterfs.yml for centos880.mydomain.com
+
+	TASK [glusterfs : Creating glusterfs cluster for pstoredata] 
+	**************************************************************************
+	Sunday  08 December 2019  20:57:03 -0500 (0:00:00.287)       0:03:46.687 *******
+	changed: [centos880.mydomain.com]
+
+	TASK [glusterfs : Pause for 30 seconds for peer probing to get complete] 
+	**************************************************************
+	Sunday  08 December 2019  20:57:15 -0500 (0:00:11.139)       0:03:57.827 *******
+	Pausing for 30 seconds
+	(ctrl+C then 'C' = continue early, ctrl+C then 'A' = abort)
+	ok: [centos880.mydomain.com]
+
+	TASK [glusterfs : Display create_volume params] 
+	***************************************************************************************
+	Sunday  08 December 2019  20:57:45 -0500 (0:00:30.068)       0:04:27.896 *******
+	ok: [centos880.mydomain.com] => {
+		"msg": [
+			"pstoredata",
+			"/glusterfs/pstoredata/brick1/brick",
+			"centos880.mydomain.com,ora8210.mydomain.com,rhel891.mydomain.com",
+			"3"
+		]
+	}
+
+	TASK [glusterfs : Creating pstoredata volume] 
+	*****************************************************************************************
+	Sunday  08 December 2019  20:57:45 -0500 (0:00:00.097)       0:04:27.993 *******
+	changed: [centos880.mydomain.com]
+
+	TASK [glusterfs : Details of newsly created pstoredata volume] 
+	************************************************************************
+	Sunday  08 December 2019  20:58:06 -0500 (0:00:20.807)       0:04:48.801 *******
+	ok: [centos880.mydomain.com] => {
+		"msg": {
+			"ansible_facts": {
+				"glusterfs": {
+					"peers": {
+						"ora8210.mydomain.com": [
+							"6dc70efe-0465-417a-b728-791b9b49e480",
+							"Peer in Cluster (Connected)"
+						],
+						"rhel891.mydomain.com": [
+							"3297ddad-eda8-4ee2-96f8-3c934e757577",
+							"Peer in Cluster (Connected)"
+						]
+					},
+					"quotas": {},
+					"volumes": {
+						"pstoredata": {
+							"bricks": [
+								"centos880.mydomain.com:/glusterfs/pstoredata/brick1/brick",
+								"ora8210.mydomain.com:/glusterfs/pstoredata/brick1/brick",
+								"rhel891.mydomain.com:/glusterfs/pstoredata/brick1/brick"
+							],
+							"id": "c1449e51-202a-4e34-865b-ee8f2f9a0dc1",
+							"name": "pstoredata",
+							"options": {
+								"nfs.disable": "on",
+								"performance.client-io-threads": "off",
+								"storage.fips-mode-rchecksum": "on",
+								"transport.address-family": "inet"
+							},
+							"quota": false,
+							"replicas": "3",
+							"status": "Started",
+							"transport": "tcp"
+						}
+					}
+				}
+			},
+			"changed": true,
+			"failed": false
+		}
+	}
+
+	TASK [glusterfs : Testing newly created volume] 
+	***************************************************************************************
+	Sunday  08 December 2019  20:58:06 -0500 (0:00:00.097)       0:04:48.898 *******
+	skipping: [ora8210.mydomain.com]
+	skipping: [rhel891.mydomain.com]
+	included: /opt/data/mydev/github/ansible_glusterfs/tasks/test_glusterfs_volume.yml for centos880.mydomain.com
+
+	TASK [glusterfs : Installing glusterfs-fuse on the test host] 
+	*************************************************************************
+	Sunday  08 December 2019  20:58:06 -0500 (0:00:00.331)       0:04:49.230 *******
+	ok: [centos880.mydomain.com]
+
+	TASK [glusterfs : Creating client mount point /pstoredata on test host] 
+	***************************************************************
+	Sunday  08 December 2019  20:58:32 -0500 (0:00:26.437)       0:05:15.667 *******
+	ok: [centos880.mydomain.com]
+
+	TASK [glusterfs : Mounting pstoredata on test host] 
+	***********************************************************************************
+	Sunday  08 December 2019  20:58:34 -0500 (0:00:01.988)       0:05:17.656 *******
+	changed: [centos880.mydomain.com]
+
+	TASK [glusterfs : Client mount details] 
+	***********************************************************************************************
+	Sunday  08 December 2019  20:58:39 -0500 (0:00:04.264)       0:05:21.920 *******
+	ok: [centos880.mydomain.com] => {
+		"msg": {
+			"changed": true,
+			"dump": "0",
+			"failed": false,
+			"fstab": "/etc/fstab",
+			"fstype": "glusterfs",
+			"name": "/pstoredata",
+			"opts": "defaults",
+			"passno": "0",
+			"src": "centos880.mydomain.com:pstoredata"
+		}
+	}
+
+	PLAY RECAP ********************************************************************************************
+	centos880.mydomain.com    : ok=30   changed=12   unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+	ora8210.mydomain.com      : ok=19   changed=9    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0
+	rhel891.mydomain.com      : ok=19   changed=9    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0
+
+	Sunday 08 December 2019  20:58:39 -0500 (0:00:00.044)       0:05:21.964 *******
+	===============================================================================
+	glusterfs : Installing GlusterFS Server, Client pkgs ------------------------------------------ 119.94s 
+	glusterfs : Installing parted, lvm2, xfsprogs -------------------------------------------------- 32.39s 
+	glusterfs : Pause for 30 seconds for peer probing to get complete ------------------------------ 30.07s 
+	glusterfs : Installing glusterfs-fuse on the test host ----------------------------------------- 26.44s 
+	glusterfs : Creating pstoredata volume --------------------------------------------------------- 20.81s 
+	glusterfs : Enabling and Starting glusterd service --------------------------------------------- 19.99s 
+	glusterfs : Installing pkgs to manage dnf repos ------------------------------------------------ 14.86s 
+	glusterfs : Creating glusterfs cluster for pstoredata ------------------------------------------ 11.14s 
+	Gathering Facts --------------------------------------------------------------------------------- 7.01s 
+	glusterfs : Reading Disk Info /dev/sdb ---------------------------------------------------------- 5.95s 
+	glusterfs : Installing CentOS PowerTools repo to address python3-pyxattr dependancy ------------- 5.44s 
+	glusterfs : Mounting pstoredata on test host ---------------------------------------------------- 4.26s 
+	glusterfs : Creating LVM Volume Group vgpstore -------------------------------------------------- 3.56s 
+	glusterfs : Creating logical volume: /dev/vgpstore/lvpstore ------------------------------------- 3.27s 
+	glusterfs : Creating xfs file system ------------------------------------------------------------ 2.73s 
+	glusterfs : Mounting /dev/mapper/vgpstore-lvpstore at /glusterfs/pstoredata/brick1 => Brick ----- 2.47s 
+	glusterfs : Getting Brick capacity -------------------------------------------------------------- 1.99s 
+	glusterfs : Creating client mount point /pstoredata on test host -------------------------------- 1.99s 
+	glusterfs : Creating partions on /dev/sdb ------------------------------------------------------- 1.62s 
+	glusterfs : Creating Mount Point ---------------------------------------------------------------- 1.55s 
+	Playbook run took 0 days, 0 hours, 5 minutes, 21 seconds
